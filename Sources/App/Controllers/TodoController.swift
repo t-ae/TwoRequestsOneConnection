@@ -20,4 +20,19 @@ final class TodoController {
             return todo.delete(on: req)
         }.transform(to: .ok)
     }
+    
+    func heavyDatabaseOperation(_ req: Request) throws -> Future<Todo> {
+        let todo = Todo(id: nil, title: "title")
+        
+        var future = todo.save(on: req)
+        
+        for i in 0..<100 {
+            future = future.flatMap { todo in
+                todo.title = "title\(i)"
+                return todo.save(on: req)
+            }
+        }
+        
+        return future
+    }
 }
